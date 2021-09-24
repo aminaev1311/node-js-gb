@@ -1,0 +1,29 @@
+{
+  "name": "hw1",
+  "version": "1.0.0",
+  "description": "homework 1",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aminaev1311/node-js-gb.git"
+  },
+  "keywords": [
+    "homework"
+  ],
+  "author": "natanm@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aminaev1311/node-js-gb/issues"
+  },
+  "homepage": "https://github.com/aminaev1311/node-js-gb#readme",
+  "dependencies": {
+    "colors": "^1.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0"
+  }
+}
