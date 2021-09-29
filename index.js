@@ -1,67 +1,119 @@
-const colors = require("colors");
+const run = () => {
+  const { DateTime } = require("luxon");
 
-const num1 = +process.argv[2];
-const num2 = +process.argv[3];
+  const date = process.argv[2];
 
-//check if the inputs are numbers, if not display and error and return
-if (isNaN(num1) || isNaN(num2)) {
-  console.log("error. both inputs should be numbers!".red);
-  if (isNaN(num1)) {
-    console.log("first input is not a number".red);
-  }
-  if (isNaN(num2)) {
-    console.log("second input is not a number".red);
-  }
-  return;
-}
+  let dateArray = [];
 
-const isPrime = (number) => {
-  if (number === 2 || number === 3) return true;
-  if (number === 1 || number % 2 === 0 || number % 3 === 0) return false;
-  for (let i = number - 1; i >= 4; i--) {
-    if (number % i === 0) return false;
+  try {
+    dateArray = date.split("-");
+  } catch {
+    console.log(
+      "Empty input. Please enter a string in the required format 'mm-hh-dd-mm-yyyy'"
+    );
+    return;
   }
-  return true;
+
+  let year,
+    month,
+    day,
+    hour,
+    minute = null;
+
+  year = +dateArray[dateArray.length - 1];
+  month = +dateArray[dateArray.length - 2];
+  day = +dateArray[dateArray.length - 3];
+  hour = +dateArray[dateArray.length - 4];
+  minute = +dateArray[dateArray.length - 5];
+
+  if (
+    isNaN(year) ||
+    isNaN(month) ||
+    isNaN(day) ||
+    isNaN(hour) ||
+    isNaN(minute)
+  ) {
+    console.log(
+      "Please enter a string in the required format 'mm-hh-dd-mm-yyyy'"
+    );
+    return;
+  }
+
+  const dateObj = {
+    year,
+    month,
+    day,
+    hour,
+    minute,
+  };
+
+  console.log("you entered", { ...dateObj });
+  console.log("the time now is " + DateTime.now().toISO());
+
+  let luxonDate = null;
+  let secondsLeft = null;
+
+  try {
+    luxonDate = DateTime.fromObject(dateObj);
+
+    secondsLeft = Math.floor(
+      luxonDate.diff(DateTime.now(), ["seconds"]).values.seconds
+    );
+  } catch {
+    console.log(
+      "Error: " +
+        luxonDate.invalid.reason +
+        "; " +
+        luxonDate.invalid.explanation
+    );
+    return;
+  }
+
+  if (secondsLeft < 0) {
+    console.log(
+      "the time occurs in the past. Please enter a time in the future."
+    );
+    return;
+  }
+
+  let seconds = secondsLeft;
+
+  class EventsHandler {
+    static start(seconds) {
+      console.log("the timer was started. Seconds left: " + seconds);
+    }
+    static tick(seconds) {
+      console.log("the timer is ticking. Seconds left: " + seconds);
+    }
+
+    static end() {
+      console.clear();
+      console.log("the timer ended! Yohoo");
+    }
+  }
+
+  const EventEmitter = require("events");
+
+  class MyEmitter extends EventEmitter {}
+
+  const emitter = new MyEmitter();
+
+  emitter.on("start", EventsHandler.start);
+  emitter.on("tick", EventsHandler.tick);
+  emitter.on("end", EventsHandler.end);
+
+  emitter.emit("start", seconds);
+
+  let timerId = setInterval(() => {
+    if (seconds > 0) {
+      seconds--;
+      if (seconds !== 0) emitter.emit("tick", seconds);
+    }
+    if (seconds === 0) {
+      emitter.emit("end");
+      clearInterval(timerId);
+    }
+  }, 1000);
 };
 
-const getPrimaryArray = (num1, num2) => {
-  let primaryArray = [];
-  const temp = 0;
-
-  //to ensure that num2 is always bigger than num1
-  if (num1 > num2) {
-    temp = num1;
-    num1 = num2;
-    num2 = temp;
-  }
-
-  for (let index = num1; index <= num2; index++) {
-    if (isPrime(index)) primaryArray.push(index);
-  }
-
-  return primaryArray;
-};
-
-let array = getPrimaryArray(num1, num2);
-
-if (array.length === 0) {
-  console.log("no prime numbers found".red);
-  return;
-}
-
-const consoleColoredOutput = (array) => {
-  for (let index = 0; index < array.length; index++) {
-    const element = array[index].toString();
-    if ((index + 1) % 3 === 1) {
-      console.log(element.green);
-    }
-    if ((index + 1) % 3 === 2) {
-      console.log(element.yellow);
-    }
-    if ((index + 1) % 3 === 0) {
-      console.log(element.red);
-    }
-  }
-};
-
-consoleColoredOutput(array);
+run();
