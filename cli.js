@@ -69,7 +69,7 @@ const run = () => {
           choices: list,
         },
       ])
-      .then((answer) => {
+      .then(async (answer) => {
         console.log(answer.fileName);
 
         const filePath = path.join(directory, answer.fileName);
@@ -81,38 +81,44 @@ const run = () => {
           //   console.log(data);
           // });
 
-          const rl = readline.createInterface({
-            input: fs.createReadStream(filePath),
-            // output: process.stdout,
-          });
-          let answer = null;
-
           const rl_pattern = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
           });
 
-          rl_pattern.question("Enter a pattern to match", (myAnswer) => {
-            answer = myAnswer;
-            console.log("Your pattern is", myAnswer);
-            rl_pattern.close();
-          });
+          const question = (query) =>
+            new Promise((resolve) => rl_pattern.question(query, resolve));
+
+          let answer = null;
 
           rl_pattern.on("close", function () {
             process.exit(0);
           });
 
+          answer = await question("Please enter a pattern to match: ");
+
+          const rl = readline.createInterface({
+            input: fs.createReadStream(filePath),
+            // output: process.stdout,
+          });
+
           let line = null;
           rl.on("line", (newLine) => {
             line = newLine;
-            console.log(newLine);
             if (newLine.includes(answer)) {
-              console.log(`${answer} pattern found in the line}`);
+              console.log(`${answer} pattern found in the line below`);
             }
+            console.log(newLine);
           });
           rl.on("close", function () {
             process.exit(0);
           });
+
+          // rl_pattern.question("Enter a pattern to match", (myAnswer) => {
+          //   answer = myAnswer;
+          //   console.log("Your pattern is", myAnswer);
+          //   rl_pattern.close();
+          // });
         } else {
           directory = filePath;
           run();
