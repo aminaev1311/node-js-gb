@@ -1,7 +1,6 @@
 {
   "name": "-hw1",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "dependencies": {
     "acorn": "^7.4.1",
@@ -122,5 +121,7 @@
   "bugs": {
     "url": "https://github.com/aminaev1311/node-js-gb/issues"
   },
-  "homepage": "https://github.com/aminaev1311/node-js-gb#readme"
+  "homepage": "https://github.com/aminaev1311/node-js-gb#readme",
+  "devDependencies": {},
+  "description": ""
 }
