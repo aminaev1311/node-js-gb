@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Socket Client</title>
+    <script
+      src="https://cdn.socket.io/4.2.0/socket.io.min.js"
+      integrity="sha384-PiBR5S00EtOj2Lto9Uu81cmoyZqR57XcOna1oAuVuIEjzj0wpqDVfD0JA9eXlRsj"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+  </head>
+  <body>
+    <h1>Socket messenger</h1>
+    <h2>Visitors on the site: <span id="counter">1</span></h2>
+    <input type="text" id="input" autofocus />
+    <button id="button">Send</button>
+    <ul id="messages"></ul>
+    <script>
+      let counter = 0;
+      const id = uuidv4();
+      const socket = io("localhost:5555");
+      const counterElem = document.getElementById("counter");
+      const messagesElem = document.getElementById("messages");
+      const btn = document.getElementById("button");
+      const input = document.getElementById("input");
+
+      const addMsg = (msg) => {
+        messagesElem.insertAdjacentHTML("beforeend", `<span>${msg}<span><br>`);
+      };
+
+      const addNick = (nick) => {
+        messagesElem.insertAdjacentHTML("beforeend", `<span>${nick}<span>: `);
+      };
+
+      const updateCounterHTML = (counter) => {
+        counterElem.innerHTML = counter;
+      };
+
+      socket.on("connect", () => {
+        console.log("client connected");
+        socket.emit("get-counter");
+      });
+
+      socket.on("COUNTER", (data) => {
+        console.log("received counter", data.counter);
+        updateCounterHTML(data.counter);
+      });
+
+      socket.on("SERVER_MSG", (data) => {
+        if (data.msg) {
+          addNick(data.nick);
+          addMsg(data.msg);
+        }
+      });
+
+      socket.on("NEW_CONN_EVENT", (data) => {
+        if (data.msg) {
+          addNick(data.nick);
+          addMsg(data.msg);
+          updateCounterHTML(data.counter);
+        }
+      });
+
+      socket.on("NEW_DISCON_EVENT", (data) => {
+        counterElem.innerText = counter;
+        if (data.msg) {
+          addNick(data.nick);
+          addMsg(data.msg);
+          updateCounterHTML(data.counter);
+        }
+      });
+
+      btn.onclick = () => {
+        const data = {
+          msg: input.value,
+          nick: id,
+        };
+        socket.emit("CLIENT_MSG", data);
+        input.value = "";
+      };
+    </script>
+  </body>
+</html>
